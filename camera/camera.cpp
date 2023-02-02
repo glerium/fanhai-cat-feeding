@@ -2,12 +2,7 @@
 
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
-hw_timer_t* timer = NULL;   // 拍照计时器
-
-const char ipAddress[] = "192.168.1.13";
-const int port = 80;
-const char* ssid = "glerium";
-const char* password = "Wenzelin2004";
+hw_timer_t * timer = NULL;   // 拍照计时器
 
 camera_fb_t * capture();    // 拍照
 void IRAM_ATTR onTimer();   // 拍照计时回调
@@ -67,4 +62,8 @@ void process_error() {
 
 void do_feed() {
   // 向单片机发送数据
+  for(size_t i = 0; i < 20; i++){
+    Serial2.write('1');
+    delay(10);
+  }
 }
