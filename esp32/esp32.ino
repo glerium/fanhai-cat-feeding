@@ -1,19 +1,24 @@
-const int buzz=0, motor=1, steer=2;     // 蜂鸣器、电机、舵机绑定的ledc_channel
+/*
+    猫猫投喂机的单片机端代码
+    本代码作者：温泽林@翻海小分队
+    小组成员：刘泽瑄、温泽林、路广城、王童、吴浏宇
+*/
+const int buzz=0, motor=1, steer=2;             // 蜂鸣器、电机、舵机绑定的ledc_channel
 const int S_LEFT=7, S_FORWARD=21, S_RIGHT=33;   // 舵机方向参数
 
 void init();
 void do_feed();
 
 void setup() {
-  
+  init();
 }
 
-char val[32];
+bool val[32];
 void loop() {
   // 读取UART数据
-  static int sum=0, idx=0;
+  static int sum = 0, idx = 0;
   if(sum > 25) {
-    for(int i = 0; i < 30; i++) 
+    for(int i = 0; i < 30; i++)
       val[i] = 0;
     do_feed();
     sum = 0;
@@ -66,5 +71,8 @@ void do_feed() {
   delay(2000);
   ledcWriteTone(buzz, 0);
   // 向摄像头返回数据
-
+  for(int i = 1; i <= 30; i++) {
+    Serial.write('1');
+    delay(10);
+  }
 }

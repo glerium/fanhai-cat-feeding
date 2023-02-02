@@ -2,7 +2,9 @@
 
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
-hw_timer_t * timer = NULL;     // 拍照计时器
+hw_timer_t * timer = NULL;       // 拍照计时器
+hw_timer_t * timer_msg = NULL;   // 消息发送计时器
+char recognized;
 
 /* 拍照计时回调，每三秒调用一次 */
 // 功能：拍照并获取结果，成功则向单片机发送执行指令
@@ -18,6 +20,12 @@ void IRAM_ATTR onTimer() {
     timerAlarmEnable(timer);    // 启动计时器
   }
 }
+
+/* 指令发送计时回调 */
+// 功能：每10ms触发一次，利用UART向单片机发送是否识别的消息
+void IRAM_ATTR onTimerMsg() {
+  Serial2.write(recognized ? '1' : '0');
+}  
 
 /* 拍摄照片，返回一个camera_fb_t指针 */
 camera_fb_t * capture() {
@@ -53,6 +61,8 @@ bool get_api_result(camera_fb_t * fb) {
   Serial.print("Status code: ");
   Serial.print(status);
   Serial.print("\nResponse:\n" + response);
+
+  return true;
 }
 
 /* 错误处理 */
@@ -62,8 +72,16 @@ void process_error() {
 
 /* 向单片机发送放粮指令 */
 void do_feed() {
-  for(size_t i = 0; i < 20; i++){
-    Serial2.write('1');
-    delay(10);
+  recognized = true;
+  delay(300);
+  recognized = false;
+  int sum = 0, i = 1;
+  while(i <= 100) {
+    if(Serial2.available()) {
+      char tm = Serial2.read();
+      if(tm == '1') sum++;
+      if(sum >= 20) break;
+      i++;
+    }
   }
 }

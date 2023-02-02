@@ -13,7 +13,8 @@ void init(){
   Serial2.begin(9200, SERIAL_8N1, 19, 21);  //跨单片机串口
   camera_init();
   wifi_init();
-  timer = timerBegin(0, 80, true);  // 拍照计时器
+  timer = timerBegin(0, 80, true);      // 拍照计时器
+  timer_msg = timerBegin(1, 80, true);  // 指令发送计时器
   timer_init();
 }
 
@@ -105,7 +106,12 @@ void wifi_init(){
 }
 
 void timer_init(){
+  // 初始化拍照计时器
   timerAttachInterrupt(timer, onTimer, true);
   timerAlarmWrite(timer, 3000000, true);    // 每3秒触发一次计时器
+  timerAlarmEnable(timer);
+  // 初始化指令发送计时器
+  timerAttachInterrupt(timer, onTimerMsg, true);
+  timerAlarmWrite(timer, 10000, true);    // 每10ms触发一次计时器
   timerAlarmEnable(timer);
 }
