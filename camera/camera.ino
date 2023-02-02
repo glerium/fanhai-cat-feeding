@@ -10,8 +10,9 @@ void setup() {
   init();       // 调用初始化函数
   camera_fb_t * fb = capture();
   if(!fb) {
-    // todo：错误处理
+    while(true);  // 错误处理
   }
+  
 }
 
 void loop() {

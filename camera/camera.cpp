@@ -22,7 +22,7 @@ void IRAM_ATTR onTimer() {
   if(!fb) {
     process_error();
   }
-  bool iscat = get_recogn_result(fb);
+  bool iscat = get_api_result(fb);
   if(iscat) {
     timerAlarmDisable(timer);   // 暂停计时器
     do_feed();
@@ -46,7 +46,7 @@ camera_fb_t * capture() {
   }
 }
 
-bool get_recogn_result(camera_fb_t * fb) {
+bool get_api_result(camera_fb_t * fb) {
   char image[fb->len * 2 + 10];
   memcpy(image, fb->buf, fb->len);
   const char path[] = "/?threshold=0.3";
