@@ -1,6 +1,13 @@
 #include "camera.h"
-WiFiClient client;
+
+WiFiClient wifi;
+HttpClient client = HttpClient(wifi, ipAddress, port);
 hw_timer_t* timer = NULL;   // 拍照计时器
+
+const char ipAddress[] = "192.168.1.13";
+const int port = 80;
+const char* ssid = "glerium";
+const char* password = "Wenzelin2004";
 
 camera_fb_t * capture();    // 拍照
 void IRAM_ATTR onTimer();   // 拍照计时回调
@@ -40,9 +47,18 @@ camera_fb_t * capture() {
 }
 
 bool get_recogn_result(camera_fb_t * fb) {
-  uint8_t image[fb->len + 10];
+  char image[fb->len * 2 + 10];
   memcpy(image, fb->buf, fb->len);
-  return true;
+  const char path[] = "/?threshold=0.3";
+  client.beginRequest();
+  client.post(path, "image/jpeg", image);
+  
+  int status = client.responseStatusCode();
+  // client.skipResponseHeaders();
+  String response = client.responseBody();
+  Serial.print("Status code: ");
+  Serial.print(status);
+  Serial.print("\nResponse:\n" + response);
 }
 
 void process_error() {

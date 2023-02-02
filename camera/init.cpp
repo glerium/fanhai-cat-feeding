@@ -1,12 +1,6 @@
 //摄像头、WiFi模块初始化
 #include "camera.h"
 
-// const char* ssid = "esp32-AP";   // 单片机热点
-// const char* ssid = "LAPTOP-Q11G4URH 5124";       // 电脑热点
-const char* ssid = "glerium";       // 手机热点
-const char* password = "Wenzelin2004";
-
-
 void init();
 void camera_init();
 void wifi_init();
