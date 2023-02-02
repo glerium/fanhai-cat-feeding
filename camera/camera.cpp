@@ -2,13 +2,7 @@
 
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
-hw_timer_t * timer = NULL;   // 拍照计时器
-
-camera_fb_t * capture();    // 拍照
-void IRAM_ATTR onTimer();   // 拍照计时回调
-void process_error();       // 异常处理
-bool get_recogn_result(camera_fb_t *);
-void do_feed();
+hw_timer_t * timer = NULL;     // 拍照计时器
 
 /* 拍照计时回调，每三秒调用一次 */
 // 功能：拍照并获取结果，成功则向单片机发送执行指令
@@ -25,9 +19,10 @@ void IRAM_ATTR onTimer() {
   }
 }
 
+/* 拍摄照片，返回一个camera_fb_t指针 */
 camera_fb_t * capture() {
-  camera_fb_t * fb = esp_camera_fb_get();   // 调用摄像机
-  if (!fb) {    // 拍摄不成功则fb的值为nullptr
+  camera_fb_t * fb = esp_camera_fb_get();   // 调用摄像头
+  if (!fb) {      // 拍摄不成功则fb的值为nullptr
       Serial.println("Image capture failed");
       return NULL;
   }
@@ -41,13 +36,17 @@ camera_fb_t * capture() {
   }
 }
 
+/* 向服务器发送API识别请求、处理服务器的回复 */
+// 参数：来自capture()函数的camera_fb_t指针
+// 返回值：一个bool，表示是否识别成功
 bool get_api_result(camera_fb_t * fb) {
+  // 图片预处理
   char image[fb->len * 2 + 10];
-  memcpy(image, fb->buf, fb->len);
+  memcpy(image, fb->buf, fb->len);    // 从内存中截取图片帧
+
   const char path[] = "/?threshold=0.3";
   client.beginRequest();
   client.post(path, "image/jpeg", image);
-  
   int status = client.responseStatusCode();
   // client.skipResponseHeaders();
   String response = client.responseBody();
@@ -56,12 +55,13 @@ bool get_api_result(camera_fb_t * fb) {
   Serial.print("\nResponse:\n" + response);
 }
 
+/* 错误处理 */
 void process_error() {
   while(1);
 }
 
+/* 向单片机发送放粮指令 */
 void do_feed() {
-  // 向单片机发送数据
   for(size_t i = 0; i < 20; i++){
     Serial2.write('1');
     delay(10);

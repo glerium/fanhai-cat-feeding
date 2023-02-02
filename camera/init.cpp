@@ -1,10 +1,10 @@
-//摄像头、WiFi模块初始化
+// 初始化摄像头、WiFi模块、计时器
 #include "camera.h"
 
 void init();
-void camera_init();
-void wifi_init();
-void timer_init();
+void camera_init();   // 初始化摄像头模块
+void wifi_init();     // 初始化Wifi模块
+void timer_init();    // 初始化计时器
 
 void init(){
   Serial.begin(115200);             // 电脑串口

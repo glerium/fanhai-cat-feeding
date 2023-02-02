@@ -1,5 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
+
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <base64.h>
@@ -20,12 +21,12 @@ const int port = 80;
 
 const char ssid[] = "glerium";
 const char password[] = "Wenzelin2004";
-// extern const int buzz, motor, steer;          // 蜂鸣器、电机、舵机绑定的ledc_channel
-// extern const int S_LEFT, S_FORWARD, S_RIGHT;  // 舵机方向参数
 
-void init();
-camera_fb_t * capture();   // 拍照
+void init();                // 初始化
+camera_fb_t * capture();    // 拍照
 bool get_api_result(camera_fb_t * fb);    // 请求识别结果
-
+void process_error();       // 异常处理
+void do_feed();             // 向单片机发送放粮指令
 void IRAM_ATTR onTimer();   // 拍照计时回调
+
 #endif
