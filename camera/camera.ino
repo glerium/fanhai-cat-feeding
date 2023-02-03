@@ -7,13 +7,13 @@
 #include "camera.h"
 void init_cam();      // 摄像头初始化
 void init_timer();    // 计时器初始化
+Ticker ticker, ticker_msg;
 
 /* 指令发送计时回调 */
 // 功能：每10ms触发一次，利用UART向单片机发送是否识别的消息
 void IRAM_ATTR onTimerMsg() {
   #ifdef DEBUG
   Serial.println("timer 1");
-  // Serial.flush();
   #endif
   // Serial2.write(recognized ? '1' : '0');
 }
@@ -30,6 +30,32 @@ void setup() {
 
 void loop() {
   
+}
+
+/* 初始化计时器 */
+void init_timer() {
+  ticker.attach(3, onTimer);
+  ticker_msg.attach_ms(10, onTimerMsg);
+}
+
+void wifi_init(){
+  // IPAddress local_IP(192, 168, 1, 101);
+  // IPAddress gateway(192, 168, 1, 1);
+  // IPAddress subnet(255, 255, 255, 255);
+  // IPAddress dns(8, 8, 8, 8);
+  // Serial.printf("%s %s\n", ssid, password);
+  // if (WiFi.config(local_IP, gateway, subnet, dns, dns) == false) {
+  //   Serial.println("Configuration failed.");
+  // }
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  } 
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
 /* 初始化摄像头 */
@@ -57,7 +83,6 @@ void init_cam() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
   if(psramFound()){
@@ -69,19 +94,16 @@ void init_cam() {
     config.jpeg_quality = 12;
     config.fb_count = 1;
   }
-
 #if defined(CAMERA_MODEL_ESP_EYE)
   pinMode(13, INPUT_PULLUP);
   pinMode(14, INPUT_PULLUP);
 #endif
-
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x\n", err);
     return;
   }
-
   sensor_t * s = esp_camera_sensor_get();
   // initial sensors are flipped vertically and colors are a bit saturated
   if (s->id.PID == OV3660_PID) {
@@ -91,46 +113,12 @@ void init_cam() {
   }
   // drop down frame size for higher initial frame rate
   s->set_framesize(s, FRAMESIZE_QVGA);
-
 #if defined(CAMERA_MODEL_M5STACK_WIDE) || defined(CAMERA_MODEL_M5STACK_ESP32CAM)
   s->set_vflip(s, 1);
   s->set_hmirror(s, 1);
 #endif
-
   // s->set_brightness(s, 2);
   // s->set_framesize(s, FRAMESIZE_XGA);
   // s->set_quality(s, 8);
   /* 摄像头初始化结束 */
-}
-
-/* 初始化计时器 */
-void init_timer() {
-  timer = timerBegin(0, 80, true);          // 拍照计时器
-  timerAttachInterrupt(timer, &onTimer, true);
-  timerAlarmWrite(timer, 3000000, true);    // 每3秒触发一次计时器
-  timerAlarmEnable(timer);
-  timer_msg = timerBegin(1, 80, true);      // 指令发送计时器
-  timerAttachInterrupt(timer_msg, &onTimerMsg, true);
-  timerAlarmWrite(timer_msg, 10000, true);     // 每10ms触发一次计时器
-  timerAlarmEnable(timer_msg);
-}
-
-void wifi_init(){
-  // IPAddress local_IP(192, 168, 1, 101);
-  // IPAddress gateway(192, 168, 1, 1);
-  // IPAddress subnet(255, 255, 255, 255);
-  // IPAddress dns(8, 8, 8, 8);
-  // Serial.printf("%s %s\n", ssid, password);
-  // if (WiFi.config(local_IP, gateway, subnet, dns, dns) == false) {
-  //   Serial.println("Configuration failed.");
-  // }
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  } 
-  Serial.println("");
-  Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
 }

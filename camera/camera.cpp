@@ -1,3 +1,4 @@
+#include "stdint.h"
 #include "camera.h"
 
 WiFiClient wifi;
@@ -21,17 +22,14 @@ void IRAM_ATTR onTimer() {
     process_error();
     return;
   }
+  Serial.println("no error");
   bool iscat = get_api_result(fb);
+  Serial.println("api got");
   if(iscat) {
-    timerAlarmDisable(timer);   // 暂停计时器
     do_feed();
-    timerAlarmEnable(timer);    // 启动计时器
   }
+  Serial.println("feed done");
 }
-
-#include "camera.h"
-void init_cam();      // 摄像头初始化
-void init_timer();    // 计时器初始化
 
 /* 拍摄照片，返回一个camera_fb_t指针 */
 camera_fb_t * capture() {
@@ -57,19 +55,28 @@ camera_fb_t * capture() {
 // 返回值：一个bool，表示是否识别成功
 bool get_api_result(camera_fb_t * fb) {
   // 图片预处理
-  char image[fb->len * 2 + 10];
-  memcpy(image, fb->buf, fb->len);    // 从内存中截取图片帧
-
+  // char image[fb->len * 2 + 10];
+  // Serial.println("memcpy ready");
+  // memcpy(image, fb->buf, fb->len);    // 从内存中截取图片帧
+  // Serial.println("memcpy done");
   const char path[] = "/?threshold=0.3";
   client.beginRequest();
-  client.post(path, "image/jpeg", image);
+#define debug(x) Serial.println(x)
+  debug("begun req");
+  byte* img = (byte*)(fb->buf);
+  int len = fb->len * sizeof(uint8_t) / sizeof(byte);
+  int resp = client.post(path, "image/jpeg", len, img);
+  debug("posted");
   int status = client.responseStatusCode();
+  debug(status);
   // client.skipResponseHeaders();
+  debug("aa");
   String response = client.responseBody();
+  debug("bb");
   Serial.print("Status code: ");
   Serial.print(status);
   Serial.print("\nResponse:\n" + response);
-
+  debug("end");
   return true;
 }
 
