@@ -9,9 +9,17 @@ char recognized;
 /* 拍照计时回调，每三秒调用一次 */
 // 功能：拍照并获取结果，成功则向单片机发送执行指令
 void IRAM_ATTR onTimer() {
+  #ifdef DEBUG
+  Serial.println("timer 0");
+  // return;
+  // Serial.flush();
+  #endif
+  Serial.println("ready to capture");
   camera_fb_t * fb = capture();
+  Serial.println("captureed");
   if(!fb) {
     process_error();
+    return;
   }
   bool iscat = get_api_result(fb);
   if(iscat) {
@@ -21,15 +29,15 @@ void IRAM_ATTR onTimer() {
   }
 }
 
-/* 指令发送计时回调 */
-// 功能：每10ms触发一次，利用UART向单片机发送是否识别的消息
-void IRAM_ATTR onTimerMsg() {
-  Serial2.write(recognized ? '1' : '0');
-}  
+#include "camera.h"
+void init_cam();      // 摄像头初始化
+void init_timer();    // 计时器初始化
 
 /* 拍摄照片，返回一个camera_fb_t指针 */
 camera_fb_t * capture() {
+  Serial.println("in capture()");
   camera_fb_t * fb = esp_camera_fb_get();   // 调用摄像头
+  Serial.println("captured in capture()");
   if (!fb) {      // 拍摄不成功则fb的值为nullptr
       Serial.println("Image capture failed");
       return NULL;
@@ -67,7 +75,7 @@ bool get_api_result(camera_fb_t * fb) {
 
 /* 错误处理 */
 void process_error() {
-  while(1);
+  Serial.println("An error occurred.");
 }
 
 /* 向单片机发送放粮指令 */

@@ -9,7 +9,6 @@
 // Select camera model
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 #include "camera_pins.h"
-// #include "request.h"
 #define DEBUG
 
 extern WiFiClient wifi;
@@ -19,7 +18,7 @@ extern hw_timer_t * timer_msg;   // 指令发送计时器
 
 const char ipAddress[] = "192.168.1.13";
 const int port = 80;
-const char ssid[] = "glerium";
+const char ssid[] = "LAPTOP-Q11G4URH 5124";
 const char password[] = "Wenzelin2004";
 
 void init();                    // 初始化
