@@ -16,8 +16,8 @@ extern WiFiClient wifi;
 extern HttpClient client;
 extern Ticker ticker, ticker_msg;
 
-const char ipAddress[] = "192.168.1.13";
-const int port = 80;
+const char ipAddress[] = "192.168.137.1";
+const int port = 5000;
 const char ssid[] = "LAPTOP-Q11G4URH 5124";
 const char password[] = "Wenzelin2004";
 

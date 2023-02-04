@@ -1,4 +1,3 @@
-#include "stdint.h"
 #include "camera.h"
 
 WiFiClient wifi;
@@ -69,6 +68,12 @@ bool get_api_result(camera_fb_t * fb) {
   debug("posted");
   int status = client.responseStatusCode();
   debug(status);
+  if(status != 200) {
+    Serial.print("HTTP Error: ");
+    Serial.print(status);
+    Serial.print("\n");
+    return false;
+  }
   // client.skipResponseHeaders();
   debug("aa");
   String response = client.responseBody();

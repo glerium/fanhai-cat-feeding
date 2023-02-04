@@ -12,7 +12,7 @@ Ticker ticker, ticker_msg;
 /* 指令发送计时回调 */
 // 功能：每10ms触发一次，利用UART向单片机发送是否识别的消息
 void IRAM_ATTR onTimerMsg() {
-  #ifdef DEBUG
+  #ifdef DEBUG_TIMER
   Serial.println("timer 1");
   #endif
   // Serial2.write(recognized ? '1' : '0');
@@ -117,8 +117,8 @@ void init_cam() {
   s->set_vflip(s, 1);
   s->set_hmirror(s, 1);
 #endif
-  // s->set_brightness(s, 2);
-  // s->set_framesize(s, FRAMESIZE_XGA);
-  // s->set_quality(s, 8);
+  s->set_brightness(s, 2);
+  s->set_framesize(s, FRAMESIZE_XGA);
+  s->set_quality(s, 8);
   /* 摄像头初始化结束 */
 }
