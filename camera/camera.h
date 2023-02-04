@@ -7,6 +7,7 @@
 #include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <Ticker.h>
+// #include <avr/wdt.h> // enabling atmega328 watchdog.
 // Select camera model
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 #include "camera_pins.h"

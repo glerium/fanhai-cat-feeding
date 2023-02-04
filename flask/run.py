@@ -5,7 +5,7 @@ app.config['DEBUG'] = True
 def hello_world():
     if(request.data):
         img = request.data
-        with open('D:\\image', 'wb') as file:
+        with open('D:\\image.jpg', 'wb') as file:
             file.write(img)
         print('file wrote')
     if(request.content_type == 'image/jpeg'):

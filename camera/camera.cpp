@@ -4,7 +4,12 @@ WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
 hw_timer_t * timer = NULL;       // 拍照计时器
 hw_timer_t * timer_msg = NULL;   // 消息发送计时器
-char recognized;
+
+void blink(int time=50) {
+  digitalWrite(33, 0);
+  delay(time);
+  digitalWrite(33, 1);
+}
 
 /* 拍照计时回调，每三秒调用一次 */
 // 功能：拍照并获取结果，成功则向单片机发送执行指令
@@ -16,18 +21,24 @@ void IRAM_ATTR onTimer() {
   #endif
   Serial.println("ready to capture");
   camera_fb_t * fb = capture();
-  Serial.println("captureed");
+  Serial.println("capture done");
+  blink();
   if(!fb) {
     process_error();
+    blink(3000);
     return;
   }
   Serial.println("no error");
   bool iscat = get_api_result(fb);
   Serial.println("api got");
+  blink();
   if(iscat) {
     do_feed();
   }
+  blink();
   Serial.println("feed done");
+  esp_camera_fb_return(fb);
+  Serial.println("img memory released");
 }
 
 /* 拍摄照片，返回一个camera_fb_t指针 */
@@ -61,13 +72,13 @@ bool get_api_result(camera_fb_t * fb) {
   const char path[] = "/?threshold=0.3";
   client.beginRequest();
 #define debug(x) Serial.println(x)
-  debug("begun req");
+  debug("begin request");
   byte* img = (byte*)(fb->buf);
   int len = fb->len * sizeof(uint8_t) / sizeof(byte);
   int resp = client.post(path, "image/jpeg", len, img);
-  debug("posted");
+  debug("posted ");
   int status = client.responseStatusCode();
-  debug(status);
+  Serial.println(status);
   if(status != 200) {
     Serial.print("HTTP Error: ");
     Serial.print(status);
@@ -75,13 +86,8 @@ bool get_api_result(camera_fb_t * fb) {
     return false;
   }
   // client.skipResponseHeaders();
-  debug("aa");
   String response = client.responseBody();
-  debug("bb");
-  Serial.print("Status code: ");
-  Serial.print(status);
-  Serial.print("\nResponse:\n" + response);
-  debug("end");
+  Serial.println("Response:\n" + response);
   return true;
 }
 
@@ -92,16 +98,19 @@ void process_error() {
 
 /* 向单片机发送放粮指令 */
 void do_feed() {
-  recognized = true;
-  delay(300);
-  recognized = false;
-  int sum = 0, i = 1;
-  while(i <= 100) {
-    if(Serial2.available()) {
-      char tm = Serial2.read();
-      if(tm == '1') sum++;
-      if(sum >= 20) break;
-      i++;
-    }
+  digitalWrite(33, 0);
+  for(int i = 0; i < 30; i++) {
+    Serial1.write('1');
+    delay(10);
   }
+  digitalWrite(33, 1);
+  // int sum = 0, i = 1;
+  // while(i <= 100) {
+  //   if(Serial2.available()) {
+  //     char tm = Serial2.read();
+  //     if(tm == '1') sum++;
+  //     if(sum >= 20) break;
+  //     i++;
+  //   }
+  // }
 }

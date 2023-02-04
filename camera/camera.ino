@@ -10,22 +10,25 @@ void init_timer();    // 计时器初始化
 Ticker ticker, ticker_msg;
 
 /* 指令发送计时回调 */
-// 功能：每10ms触发一次，利用UART向单片机发送是否识别的消息
+// 功能：每10ms触发一次，利用UART向单片机发送未识别消息
 void IRAM_ATTR onTimerMsg() {
   #ifdef DEBUG_TIMER
   Serial.println("timer 1");
   #endif
-  // Serial2.write(recognized ? '1' : '0');
+  Serial1.write('0');
 }
 
 void setup() {
   Serial.begin(115200);             // 电脑串口
   Serial.setDebugOutput(true);      // 显示调试代码，测试结束后记得删掉
   Serial.println();
-
+  // Serial1.begin(9600, SERIAL_8N1, 3, 1);  //跨单片机串口
+  pinMode(33, OUTPUT);
+  digitalWrite(33, 0);
   init_cam();     // 初始化摄像头
   wifi_init();
   init_timer();
+  digitalWrite(33, 1);
 }
 
 void loop() {
@@ -34,7 +37,7 @@ void loop() {
 
 /* 初始化计时器 */
 void init_timer() {
-  ticker.attach(3, onTimer);
+  ticker.attach(10, onTimer);
   ticker_msg.attach_ms(10, onTimerMsg);
 }
 
@@ -117,8 +120,8 @@ void init_cam() {
   s->set_vflip(s, 1);
   s->set_hmirror(s, 1);
 #endif
-  s->set_brightness(s, 2);
-  s->set_framesize(s, FRAMESIZE_XGA);
-  s->set_quality(s, 8);
+  // s->set_brightness(s, 2);
+  // s->set_framesize(s, FRAMESIZE_XGA);
+  // s->set_quality(s, 8);
   /* 摄像头初始化结束 */
 }
