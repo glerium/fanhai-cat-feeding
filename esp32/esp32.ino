@@ -20,18 +20,6 @@ HttpClient client = HttpClient(wifi, ipAddress, port);
 void init();
 void do_feed();
 
-void do_green(int time = 500) {
-  digitalWrite(green, 0);
-  delay(time);
-  digitalWrite(green, 1);
-}
-
-void do_red(int time = 500) {
-  digitalWrite(red, 0);
-  delay(time);
-  digitalWrite(red, 1);
-}
-
 void blink(int time = 500) {
   digitalWrite(green, 0);
   digitalWrite(red, 0);
@@ -55,6 +43,28 @@ void loop() {
   String response = client.responseBody();
   if(response[0] == '1')
     do_feed();
+}
+
+void do_feed() {
+  // 流程开始，发出3次警报声
+  for(int i = 3; i > 0; i--){
+    ledcWriteTone(buzz, 494);
+    delay(200);
+    ledcWriteTone(buzz, 0);
+    if(i) delay(30);
+  }
+  // 驱动电机旋转3圈
+  ledcWrite(motor, 200);
+  delay(1200);
+  ledcWrite(motor, 0);
+  // 舵机转动90度
+  ledcWrite(steer, S_LEFT);
+  delay(5000);
+  ledcWrite(steer, S_FORWARD);
+  // 蜂鸣器长报警，流程结束
+  ledcWriteTone(buzz, 494);
+  delay(2000);
+  ledcWriteTone(buzz, 0);
 }
 
 void init() {
@@ -88,26 +98,4 @@ void wifi_init(){
   Serial.println("WiFi connected.");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-}
-
-void do_feed() {
-  // 流程开始，发出3次警报声
-  for(int i = 3; i > 0; i--){
-    ledcWriteTone(buzz, 494);
-    delay(200);
-    ledcWriteTone(buzz, 0);
-    if(i) delay(30);
-  }
-  // 驱动电机旋转3圈
-  ledcWrite(motor, 200);
-  delay(1200);
-  ledcWrite(motor, 0);
-  // 舵机转动90度
-  ledcWrite(steer, S_LEFT);
-  delay(5000);
-  ledcWrite(steer, S_FORWARD);
-  // 蜂鸣器长报警，流程结束
-  ledcWriteTone(buzz, 494);
-  delay(2000);
-  ledcWriteTone(buzz, 0);
 }
