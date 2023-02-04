@@ -100,7 +100,7 @@ void do_feed() {
   }
   // 驱动电机旋转3圈
   ledcWrite(motor, 200);
-  delay(1000);
+  delay(1200);
   ledcWrite(motor, 0);
   // 舵机转动90度
   ledcWrite(steer, S_LEFT);
