@@ -20,13 +20,12 @@ void IRAM_ATTR onTimerMsg() {
 
 void setup() {
   Serial.begin(115200);             // 电脑串口
-  Serial.setDebugOutput(true);      // 显示调试代码，测试结束后记得删掉
+  // Serial.setDebugOutput(true);      // 显示调试代码，测试结束后记得删掉
   Serial.println();
-  // Serial1.begin(9600, SERIAL_8N1, 3, 1);  //跨单片机串口
   pinMode(33, OUTPUT);
   digitalWrite(33, 0);
   init_cam();     // 初始化摄像头
-  wifi_init();
+  init_wifi();
   init_timer();
   digitalWrite(33, 1);
 }
@@ -41,7 +40,7 @@ void init_timer() {
   ticker_msg.attach_ms(10, onTimerMsg);
 }
 
-void wifi_init(){
+void init_wifi(){
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
