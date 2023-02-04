@@ -3,8 +3,6 @@
 
 #include "esp_camera.h"
 #include <WiFi.h>
-#include <base64.h>
-#include <ArduinoJson.h>
 #include <ArduinoHttpClient.h>
 #include <Ticker.h>
 // #include <avr/wdt.h> // enabling atmega328 watchdog.
@@ -17,9 +15,9 @@ extern WiFiClient wifi;
 extern HttpClient client;
 extern Ticker ticker, ticker_msg;
 
-const char ipAddress[] = "192.168.137.1";
+const char ipAddress[] = "192.168.43.142";
 const int port = 5000;
-const char ssid[] = "LAPTOP-Q11G4URH 5124";
+const char ssid[] = "glerium";
 const char password[] = "Wenzelin2004";
 
 void init();                    // 初始化

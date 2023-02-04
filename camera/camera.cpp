@@ -69,13 +69,13 @@ bool get_api_result(camera_fb_t * fb) {
   // Serial.println("memcpy ready");
   // memcpy(image, fb->buf, fb->len);    // 从内存中截取图片帧
   // Serial.println("memcpy done");
-  const char path[] = "/?threshold=0.3";
+  const char path[] = "/";
   client.beginRequest();
 #define debug(x) Serial.println(x)
   debug("begin request");
   byte* img = (byte*)(fb->buf);
   int len = fb->len * sizeof(uint8_t) / sizeof(byte);
-  int resp = client.post(path, "image/jpeg", len, img);
+  client.post(path, "image/jpeg", len, img);
   debug("posted ");
   int status = client.responseStatusCode();
   Serial.println(status);

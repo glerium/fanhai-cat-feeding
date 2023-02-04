@@ -4,68 +4,69 @@
     小组成员：刘泽瑄、温泽林、路广城、王童、吴浏宇
 */
 #include <Ticker.h>
+#include <WiFi.h>
+#include <ArduinoHttpClient.h>
 const int buzz=0, motor=1, steer=2;             // 蜂鸣器、电机、舵机绑定的ledc_channel
 const int S_LEFT=7, S_FORWARD=21, S_RIGHT=33;   // 舵机方向参数
 Ticker greens, reds;
 const int red = 32, green = 33;
+const char ipAddress[] = "192.168.43.142";
+const int port = 5000;
+const char ssid[] = "glerium";
+const char password[] = "Wenzelin2004";
+WiFiClient wifi;
+HttpClient client = HttpClient(wifi, ipAddress, port);
 
 void init();
 void do_feed();
 
-void shut_green() {
+void do_green(int time = 500) {
+  digitalWrite(green, 0);
+  delay(time);
   digitalWrite(green, 1);
 }
 
-void shut_red() {
+void do_red(int time = 500) {
+  digitalWrite(red, 0);
+  delay(time);
+  digitalWrite(red, 1);
+}
+
+void blink(int time = 500) {
+  digitalWrite(green, 0);
+  digitalWrite(red, 0);
+  delay(time);
+  digitalWrite(green, 1);
   digitalWrite(red, 1);
 }
 
 void setup() {
   Serial.begin(115200);
-  // init();
-  Serial.write('1');
-  pinMode(red, OUTPUT);
-  pinMode(green, OUTPUT);
-  digitalWrite(red, 1);
-  digitalWrite(green, 1);
+  init();
+  Serial.println(WiFi.macAddress());
+  wifi_init();
+  blink(700);
 }
 
-bool val[32];
 void loop() {
-  if(Serial.available()) {
-    char a = Serial.read();
-    if(a == '0') {
-      digitalWrite(red, 0);
-      reds.attach_ms(5, shut_red);
-    } else {
-      digitalWrite(green, 0);
-      greens.attach_ms(5, shut_green);
-    }
-  }
-  // 读取UART数据
-  // static int sum = 0, idx = 0;
-  // if(sum > 25) {
-  //   for(int i = 0; i < 30; i++)
-  //     val[i] = 0;
-  //   do_feed();
-  //   sum = 0;
-  // } else {
-  //   sum -= val[idx];
-  //   if(Serial.available()){
-  //     val[idx] = Serial.read() == '1' ? 1 : 0;
-  //     sum += val[idx];
-  //     idx = (idx + 1) % 30;
-  //   }
-  // }
+  client.get("/recognized");
+  int status = client.responseStatusCode();
+  Serial.println(status);
+  String response = client.responseBody();
+  if(response[0] == '1')
+    do_feed();
 }
 
 void init() {
-  // 初始化UART模块
-  Serial.begin(9600, SERIAL_8N1, 19, 21);
   // 将对应引脚设为输出模式
   pinMode(25, OUTPUT);    // 蜂鸣器
   pinMode(26, OUTPUT);    // 电机
   pinMode(15, OUTPUT);    // 舵机
+  pinMode(red, OUTPUT);
+  pinMode(green, OUTPUT);
+  // 关闭LED灯
+  digitalWrite(red, 1);
+  digitalWrite(green, 1);
   // 将引脚与对应ledc频道绑定
   ledcAttachPin(25, buzz);
   ledcAttachPin(26, motor);
@@ -75,6 +76,18 @@ void init() {
   ledcSetup(steer, 50, 8);
   // 设定舵机状态
   ledcWrite(steer, S_FORWARD);   // 默认居中
+}
+
+void wifi_init(){
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
 void do_feed() {
@@ -97,9 +110,4 @@ void do_feed() {
   ledcWriteTone(buzz, 494);
   delay(2000);
   ledcWriteTone(buzz, 0);
-  // 向摄像头返回数据
-  for(int i = 1; i <= 30; i++) {
-    Serial.write('1');
-    delay(10);
-  }
 }

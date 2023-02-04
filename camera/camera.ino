@@ -37,19 +37,11 @@ void loop() {
 
 /* 初始化计时器 */
 void init_timer() {
-  ticker.attach(10, onTimer);
+  ticker.attach(3, onTimer);
   ticker_msg.attach_ms(10, onTimerMsg);
 }
 
 void wifi_init(){
-  // IPAddress local_IP(192, 168, 1, 101);
-  // IPAddress gateway(192, 168, 1, 1);
-  // IPAddress subnet(255, 255, 255, 255);
-  // IPAddress dns(8, 8, 8, 8);
-  // Serial.printf("%s %s\n", ssid, password);
-  // if (WiFi.config(local_IP, gateway, subnet, dns, dns) == false) {
-  //   Serial.println("Configuration failed.");
-  // }
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
