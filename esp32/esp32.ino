@@ -6,26 +6,29 @@
 #include <Ticker.h>
 #include <WiFi.h>
 #include <ArduinoHttpClient.h>
-const int buzz=0, motor=1, steer=2;             // 蜂鸣器、电机、舵机绑定的ledc_channel
-const int S_LEFT=7, S_FORWARD=21, S_RIGHT=33;   // 舵机方向参数
-Ticker greens, reds;
-const int red = 32, green = 33;
+
+const int ch_buzz=0, ch_motor=1, ch_steer=2;      // 蜂鸣器、电机、舵机绑定的ledc_channel
+const int pin_red=32, pin_green=33;               // LED灯对应引脚
+const int S_LEFT=7, S_FORWARD=21, S_RIGHT=33;     // 舵机方向参数
 const char ipAddress[] = "192.168.43.142";
 const int port = 5000;
 const char ssid[] = "glerium";
 const char password[] = "Wenzelin2004";
+
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
 
 void init();
 void do_feed();
+void blink();
+void wifi_init();
 
 void blink(int time = 500) {
-  digitalWrite(green, 0);
-  digitalWrite(red, 0);
+  digitalWrite(pin_green, 0);
+  digitalWrite(pin_red, 0);
   delay(time);
-  digitalWrite(green, 1);
-  digitalWrite(red, 1);
+  digitalWrite(pin_green, 1);
+  digitalWrite(pin_red, 1);
 }
 
 void setup() {
@@ -48,23 +51,23 @@ void loop() {
 void do_feed() {
   // 流程开始，发出3次警报声
   for(int i = 3; i > 0; i--){
-    ledcWriteTone(buzz, 494);
+    ledcWriteTone(ch_buzz, 494);
     delay(200);
-    ledcWriteTone(buzz, 0);
+    ledcWriteTone(ch_buzz, 0);
     if(i) delay(30);
   }
   // 驱动电机旋转3圈
-  ledcWrite(motor, 200);
+  ledcWrite(ch_motor, 200);
   delay(1200);
-  ledcWrite(motor, 0);
+  ledcWrite(ch_motor, 0);
   // 舵机转动90度
-  ledcWrite(steer, S_LEFT);
+  ledcWrite(ch_steer, S_LEFT);
   delay(5000);
-  ledcWrite(steer, S_FORWARD);
+  ledcWrite(ch_steer, S_FORWARD);
   // 蜂鸣器长报警，流程结束
-  ledcWriteTone(buzz, 494);
+  ledcWriteTone(ch_buzz, 494);
   delay(2000);
-  ledcWriteTone(buzz, 0);
+  ledcWriteTone(ch_buzz, 0);
 }
 
 void init() {
@@ -72,20 +75,20 @@ void init() {
   pinMode(25, OUTPUT);    // 蜂鸣器
   pinMode(26, OUTPUT);    // 电机
   pinMode(15, OUTPUT);    // 舵机
-  pinMode(red, OUTPUT);
-  pinMode(green, OUTPUT);
+  pinMode(pin_red, OUTPUT);
+  pinMode(pin_green, OUTPUT);
   // 关闭LED灯
-  digitalWrite(red, 1);
-  digitalWrite(green, 1);
+  digitalWrite(pin_red, 1);
+  digitalWrite(pin_green, 1);
   // 将引脚与对应ledc频道绑定
-  ledcAttachPin(25, buzz);
-  ledcAttachPin(26, motor);
-  ledcAttachPin(15, steer);
+  ledcAttachPin(25, ch_buzz);
+  ledcAttachPin(26, ch_motor);
+  ledcAttachPin(15, ch_steer);
   // 对电机和舵机的ledc进行初始化
-  ledcSetup(motor, 50, 10);
-  ledcSetup(steer, 50, 8);
+  ledcSetup(ch_motor, 50, 10);
+  ledcSetup(ch_steer, 50, 8);
   // 设定舵机状态
-  ledcWrite(steer, S_FORWARD);   // 默认居中
+  ledcWrite(ch_steer, S_FORWARD);   // 默认居中
 }
 
 void wifi_init(){
