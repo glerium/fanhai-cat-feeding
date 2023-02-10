@@ -2,8 +2,6 @@
 
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
-hw_timer_t * timer = NULL;       // 拍照计时器
-hw_timer_t * timer_msg = NULL;   // 消息发送计时器
 
 void blink(int time = 100) {
   digitalWrite(33, 0);
@@ -12,7 +10,7 @@ void blink(int time = 100) {
 }
 
 /* 拍照计时回调，每三秒调用一次 */
-// 功能：拍照并获取结果，成功则向单片机发送执行指令
+// 功能：拍照并上传图片
 void IRAM_ATTR onTimer() {
   Serial.println("timer activated");
   camera_fb_t * fb = capture();
@@ -22,7 +20,7 @@ void IRAM_ATTR onTimer() {
     return;
   }
   Serial.println("img captured");
-  bool iscat = get_api_result(fb);
+  get_api_result(fb);
   Serial.println("requested API");
   esp_camera_fb_return(fb);      // 释放帧内存
   Serial.println("img memory released");
@@ -48,7 +46,7 @@ camera_fb_t * capture() {
 
 /* 向服务器发送API识别请求、处理服务器的回复 */
 // 参数：来自capture()函数的camera_fb_t指针
-// 返回值：一个bool，表示是否识别成功
+// 返回值：一个bool，表示是否请求成功
 bool get_api_result(camera_fb_t * fb) {
   const char path[] = "/";
   client.beginRequest();
@@ -56,7 +54,7 @@ bool get_api_result(camera_fb_t * fb) {
   byte* img = (byte*)(fb->buf);
   int len = fb->len * sizeof(uint8_t) / sizeof(byte);
   client.post(path, "image/jpeg", len, img);
-  Serial.print("posted ");
+  Serial.print("posted");
   int status = client.responseStatusCode();
   Serial.println(status);
   if(status != 200) {

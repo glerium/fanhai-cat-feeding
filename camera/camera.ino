@@ -1,5 +1,5 @@
 /*
-    猫猫投喂机的摄像头端代码，部分代码来自Arduino 2.0.1的示例代码ESP32CameraWebServer
+    猫猫投喂机的摄像头端代码
     本代码作者：温泽林@翻海小分队
     小组成员：刘泽瑄、温泽林、路广城、王童、吴浏宇
 */
@@ -7,20 +7,11 @@
 #include "camera.h"
 void init_cam();      // 摄像头初始化
 void init_timer();    // 计时器初始化
-Ticker ticker, ticker_msg;
-
-/* 指令发送计时回调 */
-// 功能：每10ms触发一次，利用UART向单片机发送未识别消息
-void IRAM_ATTR onTimerMsg() {
-  #ifdef DEBUG_TIMER
-  Serial.println("timer 1");
-  #endif
-  Serial1.write('0');
-}
+Ticker ticker;
 
 void setup() {
   Serial.begin(115200);             // 电脑串口
-  // Serial.setDebugOutput(true);      // 显示调试代码，测试结束后记得删掉
+  // Serial.setDebugOutput(true);   // 显示调试代码，测试结束后记得删掉
   Serial.println();
   pinMode(33, OUTPUT);
   digitalWrite(33, 0);
@@ -37,7 +28,6 @@ void loop() {
 /* 初始化计时器 */
 void init_timer() {
   ticker.attach(3, onTimer);
-  ticker_msg.attach_ms(10, onTimerMsg);
 }
 
 void init_wifi(){

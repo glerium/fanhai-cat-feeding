@@ -1,7 +1,6 @@
 from flask import Flask, request, abort
 from datetime import datetime
 import requests
-import json
 app = Flask(__name__)
 recognized = False
 app.config['DEBUG'] = True
