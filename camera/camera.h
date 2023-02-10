@@ -1,3 +1,6 @@
+/* 头文件，包括常用函数、常量和全局变量的声明 */
+
+// 防止头文件被重复包含
 #ifndef CAMERA_H
 #define CAMERA_H
 

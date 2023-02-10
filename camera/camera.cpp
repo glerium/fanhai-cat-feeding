@@ -1,8 +1,11 @@
+/* 常用函数的实现部分 */
+
 #include "camera.h"
 
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, ipAddress, port);
 
+/* 使LED闪烁100ms，起指示作用 */
 void blink(int time = 100) {
   digitalWrite(33, 0);
   delay(time);
@@ -15,7 +18,7 @@ void IRAM_ATTR onTimer() {
   Serial.println("timer activated");
   camera_fb_t * fb = capture();
   blink();        // 流程开始时闪烁提示
-  if(!fb) {
+  if(!fb) {       // fb==NULL则认为拍照失败
     process_error();
     return;
   }
@@ -34,7 +37,7 @@ camera_fb_t * capture() {
       Serial.println("Image capture failed");
       return NULL;
   }
-  if(fb->format == PIXFORMAT_JPEG) {
+  if(fb->format == PIXFORMAT_JPEG) {    // 默认格式为JPEG
     Serial.println("JPEG img captured.");
     return fb;
   }
@@ -51,18 +54,18 @@ bool get_api_result(camera_fb_t * fb) {
   const char path[] = "/";
   client.beginRequest();
   Serial.println("begin request");
-  byte* img = (byte*)(fb->buf);
-  int len = fb->len * sizeof(uint8_t) / sizeof(byte);
+  byte* img = (byte*)(fb->buf);         // HttpClient::post()只接受byte*类型的请求体参数
+  int len = fb->len * sizeof(uint8_t) / sizeof(byte);    // 指针从8字节类型转换成1字节后需要重新计算内容长度
   client.post(path, "image/jpeg", len, img);
   Serial.print("posted");
-  int status = client.responseStatusCode();
+  int status = client.responseStatusCode();       // 返回的HTTP代码
   Serial.println(status);
   if(status != 200) {
     Serial.print("HTTP Error: ");
     Serial.println(status);
     return false;
   }
-  String response = client.responseBody();
+  String response = client.responseBody();        // 打印返回的body便于调试
   Serial.println("Response: " + response);
   return true;
 }

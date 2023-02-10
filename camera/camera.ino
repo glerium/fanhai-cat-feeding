@@ -13,12 +13,12 @@ void setup() {
   Serial.begin(115200);             // 电脑串口
   // Serial.setDebugOutput(true);   // 显示调试代码，测试结束后记得删掉
   Serial.println();
-  pinMode(33, OUTPUT);
-  digitalWrite(33, 0);
+  pinMode(33, OUTPUT);    // LED灯，起指示作用
+  digitalWrite(33, 0);    // 开机时默认亮起
   init_cam();     // 初始化摄像头
-  init_wifi();
-  init_timer();
-  digitalWrite(33, 1);
+  init_wifi();    // 初始化WiFi模块
+  init_timer();   // 初始化Ticker模块
+  digitalWrite(33, 1);    // 初始化完成后LED熄灭指示
 }
 
 void loop() {
@@ -30,6 +30,7 @@ void init_timer() {
   ticker.attach(3, onTimer);
 }
 
+/* 初始化WiFi模块 */
 void init_wifi(){
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -44,6 +45,7 @@ void init_wifi(){
 
 /* 初始化摄像头 */
 // 这段代码似乎只能放在主ino文件，放到外部文件会报错Camera init failed with error 0x105，原因不明
+// 此部分代码来自Arduino IDE 2.0.3的示例代码 ESP32/Camera/CameraWebServer
 void init_cam() {
   /* 摄像头初始化开始 */
   camera_config_t config;
